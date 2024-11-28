@@ -70,7 +70,7 @@ class Application:
 # Constants
 API_URL = "https://fakerapi.it/api/v2/texts?_quantity=100&_locale=fa_IR"
 KAFKA_SERVER = "localhost:9092"
-KAFKA_TOPIC = "boooooks"
+KAFKA_TOPIC = "comments"
 
 # Initialize components
 api_client = APIClient(API_URL)
@@ -78,7 +78,6 @@ kafka_service = KafkaService(KAFKA_SERVER, KAFKA_TOPIC)
 
 # Run the application
 app = Application(api_client, kafka_service)
-# app.run()
 
 schedule.every(60).seconds.do(app.run)
 while True:
