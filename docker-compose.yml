@@ -22,3 +22,28 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+
+  data-producer:
+    build:
+      context: ./api_data_producer  # Set the context to the directory where the Dockerfile is located
+      dockerfile: Dockerfile  # If Dockerfile is named "Dockerfile" in that directory
+    container_name: data-producer
+    image: data-producer
+    ports:
+      - "5000:5000"  # Adjust port as needed
+    network_mode: host  # Set network mode to host
+    depends_on:
+      kafka:
+        condition: service_healthy
+      
+    environment:
+      KAFKA_BROKER: localhost:9092  # Set environment variable for Kafka broker connection
+    volumes:
+      - ./api_data_producer:/app  # Mount the `api_data_producer` directory to `/app` inside the container
