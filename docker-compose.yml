@@ -30,6 +30,18 @@ services:
       start_period: 10s
       timeout: 5s
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
+    hostname: elasticsearch
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xmx512m -Xms512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
   data-producer:
     build:
       context: ./api_data_producer  # Set the context to the directory where the Dockerfile is located
