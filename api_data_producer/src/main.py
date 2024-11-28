@@ -1,6 +1,9 @@
-import requests
-from kafka import KafkaProducer
 import json
+import time
+
+import requests
+import schedule
+from kafka import KafkaProducer
 
 
 class APIClient:
@@ -41,10 +44,6 @@ class KafkaService:
         except Exception as e:
             print(f"Error sending message to Kafka: {e}")
 
-    def close(self):
-        """Close the Kafka producer."""
-        self.producer.close()
-
 
 class Application:
     """Main application for fetching, processing, and saving data to Kafka."""
@@ -67,13 +66,11 @@ class Application:
         else:
             print("No data to process.")
 
-        self.kafka_service.close()
-
 
 # Constants
 API_URL = "https://fakerapi.it/api/v2/texts?_quantity=100&_locale=fa_IR"
 KAFKA_SERVER = "localhost:9092"
-KAFKA_TOPIC = "fake-api-topic"
+KAFKA_TOPIC = "boooooks"
 
 # Initialize components
 api_client = APIClient(API_URL)
@@ -81,4 +78,9 @@ kafka_service = KafkaService(KAFKA_SERVER, KAFKA_TOPIC)
 
 # Run the application
 app = Application(api_client, kafka_service)
-app.run()
+# app.run()
+
+schedule.every(60).seconds.do(app.run)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
