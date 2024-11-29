@@ -1,8 +1,13 @@
 # Comment Processing Pipeline
 
-## Project Overview
 The **Comment Processing Pipeline** is a distributed system consisting of three Dockerized services that handle the processing, indexing, and querying of user-generated comments.
 
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Installation](#installation)
+- [Usage](#usage)
+
+## Project Overview
 ### Services
 
 1. **`api_data_producer`**: 
@@ -33,11 +38,12 @@ Make sure you have the following installed on your local machine:
    ```bash
    git clone https://github.com/AliE99/elastic-kafka-text-processor.git
    cd elastic-kafka-text-processor
+   ```
 
 2. Build and start the services:
    ```bash
    docker-compose up --build
-
+   ```
 
 ## Usage
 
