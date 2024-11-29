@@ -50,21 +50,21 @@ services:
 
   data-producer:
     build:
-      context: ./api_data_producer  # Set the context to the directory where the Dockerfile is located
-      dockerfile: Dockerfile  # If Dockerfile is named "Dockerfile" in that directory
+      context: ./api_data_producer
+      dockerfile: Dockerfile
     container_name: data-producer
     image: data-producer
     ports:
-      - "5000:5000"  # Adjust port as needed
-    network_mode: host  # Set network mode to host
+      - "5000:5000"
+    network_mode: host
     depends_on:
       kafka:
         condition: service_healthy
       
     environment:
-      KAFKA_BROKER: localhost:9092  # Set environment variable for Kafka broker connection
+      KAFKA_BROKER: localhost:9092 
     volumes:
-      - ./api_data_producer:/app  # Mount the `api_data_producer` directory to `/app` inside the container
+      - ./api_data_producer:/app
   
   data_consumer:
     build:
@@ -74,6 +74,17 @@ services:
     image: data-consumer
     ports:
       - "5001:5001"
+    network_mode: host
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  back_end_api:
+    build:
+      context: ./text_processor_backend
+      dockerfile: Dockerfile
+    container_name: back-end-api
+    image: back-end-api
     network_mode: host
     depends_on:
       elasticsearch:
