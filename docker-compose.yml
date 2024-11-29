@@ -41,6 +41,12 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
 
   data-producer:
     build:
@@ -59,3 +65,16 @@ services:
       KAFKA_BROKER: localhost:9092  # Set environment variable for Kafka broker connection
     volumes:
       - ./api_data_producer:/app  # Mount the `api_data_producer` directory to `/app` inside the container
+  
+  data_consumer:
+    build:
+      context: ./data_consumer
+      dockerfile: Dockerfile
+    container_name: data-consumer
+    image: data-consumer
+    ports:
+      - "5001:5001"
+    network_mode: host
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
