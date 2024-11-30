@@ -50,10 +50,15 @@ class ElasticsearchService:
             must_queries.append({"match": {"Name": params.name}})
         if params.text:
             must_queries.append({"match": {"Text": params.text}})
+        
         if params.username:
             filter_queries.append({"term": {"Username": params.username}})
         if params.category:
             filter_queries.append({"term": {"Category": params.category}})
+
+        if params.id:
+            filter_queries.append({"terms": {"_id": [params.id]}})
+
         if params.start_date or params.end_date:
             date_filter = {"range": {"inserted_at": {}}}
             if params.start_date:
@@ -67,6 +72,11 @@ class ElasticsearchService:
         query_body = {
             "from": params.page,
             "size": params.size,
-            "query": {"bool": {"must": must_queries, "filter": filter_queries}},
+            "query": {
+                "bool": {
+                    "must": must_queries,
+                    "filter": filter_queries,
+                }
+            },
         }
         return query_body
