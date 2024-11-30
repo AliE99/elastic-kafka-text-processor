@@ -1,6 +1,7 @@
 from typing import Optional
-from fastapi import HTTPException
+
 from elasticsearch import Elasticsearch
+from fastapi import HTTPException
 
 from src.main import SearchParams
 
@@ -41,17 +42,15 @@ class ElasticsearchService:
     def __create_es_query(self, params: SearchParams) -> dict:
         must_queries = []
         filter_queries = []
+
         if params.name:
             must_queries.append({"match": {"Name": params.name}})
         if params.text:
             must_queries.append({"match": {"Text": params.text}})
-
         if params.username:
             filter_queries.append({"term": {"Username": params.username}})
         if params.category:
             filter_queries.append({"term": {"Category": params.category}})
-
-        # Date range filter
         if params.start_date or params.end_date:
             date_filter = {"range": {"inserted_at": {}}}
             if params.start_date:
@@ -63,6 +62,8 @@ class ElasticsearchService:
             filter_queries.append(date_filter)
 
         query_body = {
-            "query": {"bool": {"must": must_queries, "filter": filter_queries}}
+            "from": params.page,
+            "size": params.size,
+            "query": {"bool": {"must": must_queries, "filter": filter_queries}},
         }
         return query_body

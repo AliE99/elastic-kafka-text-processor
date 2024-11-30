@@ -1,11 +1,10 @@
 from typing import Optional
-from fastapi import Depends, FastAPI, HTTPException
+
 from elasticsearch import Elasticsearch
+from fastapi import Depends, FastAPI, HTTPException
 
 from src.models.models import SearchParams, TagRequest
-from src.services.elasticsearch_service import (
-    ElasticsearchService,
-)
+from src.services.elasticsearch_service import ElasticsearchService
 
 app = FastAPI()
 

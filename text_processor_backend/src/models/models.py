@@ -1,6 +1,7 @@
-from fastapi import Query
-from typing import Optional
 from datetime import date
+from typing import Optional
+
+from fastapi import Query
 from pydantic import BaseModel
 
 
@@ -10,6 +11,8 @@ class TagRequest(BaseModel):
 
 
 class SearchParams(BaseModel):
+    page: Optional[int] = Query(0, description="Starting point")
+    size: Optional[int] = Query(100, description="Number of results to return per page")
     name: Optional[str] = Query(None, description="Full-text search on 'Name' field")
     username: Optional[str] = Query(None, description="Exact match on 'Username' field")
     category: Optional[str] = Query(None, description="Exact match on 'Category' field")
