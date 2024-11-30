@@ -50,6 +50,7 @@ class ElasticsearchService:
             .add_text()
             .add_username()
             .add_category()
+            .add_tag()
             .add_date_range()
             .build()
         )
@@ -84,6 +85,11 @@ class EsQueryBuilder:
     def add_category(self):
         if self.params.category:
             self.filter_queries.append({"term": {"Category": self.params.category}})
+        return self
+
+    def add_tag(self):
+        if self.params.tag:
+            self.filter_queries.append({"term": {"Tag": self.params.tag}})
         return self
 
     def add_date_range(self):
