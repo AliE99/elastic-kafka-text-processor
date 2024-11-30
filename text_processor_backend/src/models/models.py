@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 class TagRequest(BaseModel):
-    document_id: str
+    id: str
     Tag: int
 
 

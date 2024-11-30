@@ -10,10 +10,11 @@ from src.models.models import Comment, SearchParams
 class ElasticsearchService:
     def __init__(self, es_client: Elasticsearch):
         self.es = es_client
+        self.index = "comments"
 
     def search(self, params: Optional[SearchParams]) -> list[Comment]:
         query_body = self.__create_es_query(params=params)
-        response = self.es.search(index="comments", body=query_body)
+        response = self.es.search(index=self.index, body=query_body)
         return [
             Comment(id=hit["_id"], **hit["_source"]) for hit in response["hits"]["hits"]
         ]
@@ -22,7 +23,7 @@ class ElasticsearchService:
         valid_tags = {1, 2, 3}
         return tag in valid_tags
 
-    def update_document_tag(self, document_id: str, tag: int) -> dict:
+    def update_comment_tag(self, id: str, tag: int) -> dict:
         if not self.validate_tag(tag):
             raise HTTPException(
                 status_code=400, detail="Tag must be one of 1, 2, or 3."
@@ -30,16 +31,16 @@ class ElasticsearchService:
 
         try:
             response = self.es.update(
-                index="comments",
-                id=document_id,
+                index=self.index,
+                id=id,
                 body={"doc": {"Tag": tag}},
             )
             if response.get("result") != "updated":
-                raise HTTPException(status_code=404, detail="Document not found.")
+                raise HTTPException(status_code=404, detail="Comment not found.")
             return response
         except Exception as e:
             raise HTTPException(
-                status_code=500, detail=f"Error updating document: {str(e)}"
+                status_code=500, detail=f"Error updating Comment: {str(e)}"
             )
 
     def __create_es_query(self, params: SearchParams) -> dict:

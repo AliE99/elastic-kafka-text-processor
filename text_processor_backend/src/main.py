@@ -19,6 +19,6 @@ async def search_comments(params: SearchParams = Depends()):
 
 
 @app.post("/tag/")
-async def tag_document(tag_request: TagRequest):
-    es_service.update_document_tag(tag_request.document_id, tag_request.Tag)
-    return {"message": "Document tagged successfully", "tag": tag_request.Tag}
+async def tag_comment(tag_request: TagRequest):
+    es_service.update_comment_tag(tag_request.id, tag_request.Tag)
+    return {"message": "Comment tagged successfully", "tag": tag_request.Tag}
