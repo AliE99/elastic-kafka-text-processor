@@ -1,9 +1,16 @@
 import json
 import time
+from typing import Final
 
 import requests
 import schedule
 from kafka import KafkaProducer
+
+API_URL: Final[str] = "https://fakerapi.it/api/v2/texts?_quantity=100&_locale=fa_IR"
+KAFKA_SERVER: Final[str] = "localhost:9092"
+KAFKA_TOPIC: Final[str] = "comments"
+INTERVAL_TIME_IN_SECONDS: Final[int] = 60
+SLEEP_TIME_IN_SECONDS: Final[int] = 1
 
 
 class APIClient:
@@ -45,7 +52,7 @@ class KafkaService:
             print(f"Error sending message to Kafka: {e}")
 
 
-class Application:
+class DataProducer:
     """Main application for fetching, processing, and saving data to Kafka."""
 
     def __init__(self, api_client, kafka_service):
@@ -67,19 +74,17 @@ class Application:
             print("No data to process.")
 
 
-# Constants
-API_URL = "https://fakerapi.it/api/v2/texts?_quantity=100&_locale=fa_IR"
-KAFKA_SERVER = "localhost:9092"
-KAFKA_TOPIC = "comments"
+def main():
+    api_client = APIClient(API_URL)
+    kafka_service = KafkaService(KAFKA_SERVER, KAFKA_TOPIC)
 
-# Initialize components
-api_client = APIClient(API_URL)
-kafka_service = KafkaService(KAFKA_SERVER, KAFKA_TOPIC)
+    app = DataProducer(api_client, kafka_service)
 
-# Run the application
-app = Application(api_client, kafka_service)
+    schedule.every(INTERVAL_TIME_IN_SECONDS).seconds.do(app.run)
+    while True:
+        schedule.run_pending()
+        time.sleep(SLEEP_TIME_IN_SECONDS)
 
-schedule.every(60).seconds.do(app.run)
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+
+if __name__ == "__main__":
+    main()
