@@ -90,14 +90,14 @@ GET http://127.0.0.1:8000/search/?name=John&start_date=2023-01-01&end_date=2023-
 POST http://127.0.0.1:8000/tags
 Content-Type: application/json
 {
-  "document_id": EccXd5MBxe2acnTqvErZ,
+  "id": EccXd5MBxe2acnTqvErZ,
   "tag": "important"
 }
 ```
 **Response Example**:
 ```json
 {
-  "message": "Document tagged successfully",
+  "message": "Comment tagged successfully",
   "tag": 2
 }
 ```
