@@ -43,40 +43,71 @@ class ElasticsearchService:
             )
 
     def __create_es_query(self, params: SearchParams) -> dict:
-        must_queries = []
-        filter_queries = []
+        return (
+            EsQueryBuilder(params)
+            .add_id()
+            .add_name()
+            .add_text()
+            .add_username()
+            .add_category()
+            .add_date_range()
+            .build()
+        )
 
-        if params.name:
-            must_queries.append({"match": {"Name": params.name}})
-        if params.text:
-            must_queries.append({"match": {"Text": params.text}})
-        
-        if params.username:
-            filter_queries.append({"term": {"Username": params.username}})
-        if params.category:
-            filter_queries.append({"term": {"Category": params.category}})
 
-        if params.id:
-            filter_queries.append({"terms": {"_id": [params.id]}})
+class EsQueryBuilder:
+    def __init__(self, params: SearchParams):
+        self.params = params
+        self.must_queries = []
+        self.filter_queries = []
 
-        if params.start_date or params.end_date:
+    def add_id(self):
+        if self.params.id:
+            self.filter_queries.append({"terms": {"_id": [self.params.id]}})
+        return self
+
+    def add_name(self):
+        if self.params.name:
+            self.must_queries.append({"match": {"Name": self.params.name}})
+        return self
+
+    def add_text(self):
+        if self.params.text:
+            self.must_queries.append({"match": {"Text": self.params.text}})
+        return self
+
+    def add_username(self):
+        if self.params.username:
+            self.filter_queries.append({"term": {"Username": self.params.username}})
+        return self
+
+    def add_category(self):
+        if self.params.category:
+            self.filter_queries.append({"term": {"Category": self.params.category}})
+        return self
+
+    def add_date_range(self):
+        if self.params.start_date or self.params.end_date:
             date_filter = {"range": {"inserted_at": {}}}
-            if params.start_date:
+            if self.params.start_date:
                 date_filter["range"]["inserted_at"][
                     "gte"
-                ] = params.start_date.isoformat()
-            if params.end_date:
-                date_filter["range"]["inserted_at"]["lte"] = params.end_date.isoformat()
-            filter_queries.append(date_filter)
+                ] = self.params.start_date.isoformat()
+            if self.params.end_date:
+                date_filter["range"]["inserted_at"][
+                    "lte"
+                ] = self.params.end_date.isoformat()
+            self.filter_queries.append(date_filter)
+        return self
 
-        query_body = {
-            "from": params.page,
-            "size": params.size,
+    def build(self) -> dict:
+        return {
+            "from": self.params.page,
+            "size": self.params.size,
             "query": {
                 "bool": {
-                    "must": must_queries,
-                    "filter": filter_queries,
+                    "must": self.must_queries,
+                    "filter": self.filter_queries,
                 }
             },
         }
-        return query_body
