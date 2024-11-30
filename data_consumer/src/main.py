@@ -1,9 +1,16 @@
 import json
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Final
 
 from elasticsearch import Elasticsearch, helpers
 from kafka import KafkaConsumer
+
+KAFKA_BROKER: Final[str] = "localhost:9092"
+KAFKA_TOPIC: Final[str] = "comments"
+ES_HOST: Final[str] = "localhost"
+ES_PORT: Final[int] = 9200
+ES_INDEX: Final[str] = "comments"
 
 
 class MessageConsumer(ABC):
@@ -58,10 +65,10 @@ class ElasticsearchDocumentIndexer(DocumentIndexer):
         """Prepare and rename the document fields before indexing."""
         renamed_data = {
             "Name": data["title"],
-            "Username": data["author"],  # Example username
+            "Username": data["author"],
             "Category": data["genre"],
             "Text": data["content"],
-            "inserted_at": datetime.now().isoformat(),  # Current timestamp
+            "inserted_at": datetime.now().isoformat(),
         }
         return renamed_data
 
@@ -70,19 +77,17 @@ class ElasticsearchDocumentIndexer(DocumentIndexer):
         mapping = {
             "mappings": {
                 "properties": {
-                    "Name": {"type": "text"},  # For full-text search
-                    "Username": {"type": "keyword"},  # For exact match search
-                    "Category": {"type": "keyword"},  # For exact match search
-                    "Text": {"type": "text"},  # For full-text search
-                    "inserted_at": {"type": "date"},  # Timestamp type
+                    "Name": {"type": "text"},
+                    "Username": {"type": "keyword"},
+                    "Category": {"type": "keyword"},
+                    "Text": {"type": "text"},
+                    "inserted_at": {"type": "date"},
                 }
             }
         }
 
-        # Check if the index exists, and create it if it doesn't
         if not self.es.indices.exists(index=self.es_index):
             try:
-                # Create the index with the specified mapping
                 self.es.indices.create(index=self.es_index, body=mapping)
                 print(f"Index '{self.es_index}' created with mappings.")
             except Exception as e:
@@ -102,7 +107,6 @@ class KafkaToElasticsearchService:
     def process_messages(self):
         batch = []
         for message in self.consumer.consume():
-            # Assuming message is already a dictionary and ready to be indexed
             prepared_message = self.indexer.prepare_document(data=message)
             doc = {
                 "_op_type": "index",
@@ -112,39 +116,32 @@ class KafkaToElasticsearchService:
 
             batch.append(doc)
 
-            # If batch is full, index it
             if len(batch) >= self.batch_size:
                 self.indexer.index_documents(batch)
-                batch = []  # Clear the batch after indexing
+                batch = []
 
-        # Index remaining documents if any
         if batch:
             self.indexer.index_documents(batch)
 
 
 def main():
-    kafka_broker = "localhost:9092"
-    kafka_topic = "comments"
-    es_host = "localhost"
-    es_port = 9200
-    es_index = "comments"
-
-    # Create Kafka consumer
     kafka_consumer = KafkaMessageConsumer(
-        broker=kafka_broker,
-        topic=kafka_topic,
+        broker=KAFKA_BROKER,
+        topic=KAFKA_TOPIC,
         value_deserializer=lambda x: json.loads(x.decode("utf-8")),
     )
 
-    # Create Elasticsearch indexer
     es_indexer = ElasticsearchDocumentIndexer(
-        es_host=es_host, es_port=es_port, es_index=es_index
+        es_host=ES_HOST,
+        es_port=ES_PORT,
+        es_index=ES_INDEX,
     )
 
-    # Create service to handle the Kafka-to-Elasticsearch process
-    service = KafkaToElasticsearchService(consumer=kafka_consumer, indexer=es_indexer)
+    service = KafkaToElasticsearchService(
+        consumer=kafka_consumer,
+        indexer=es_indexer,
+    )
 
-    # Start processing messages
     service.process_messages()
 
 
