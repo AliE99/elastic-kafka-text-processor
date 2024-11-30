@@ -32,4 +32,5 @@ class Comment(BaseModel):
     Username: str
     Category: str
     Text: str
+    inserted_at: str
     Tag: Optional[int] = None
