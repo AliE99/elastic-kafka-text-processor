@@ -52,12 +52,16 @@ Once the services are running, you can interact with the **`text_processor_backe
 ### Search Comments
 - **Endpoint**: `GET http://127.0.0.1:8000/search/`
 - **Parameters**:
+  - `page` (optional): Starting page if results, default is 0.
+  - `size` (optional): Number of results to return per page, default is 100.
+  - `id` (optional): The comment ID.
   - `name` (optional): The name of the commenter.
   - `username` (optional): The username of the commenter.
   - `category` (optional): The category of the comment.
   - `text` (optional): The content of the comment.
   - `start_date` (optional): The starting date for filtering comments (format: `YYYY-MM-DD`).
   - `end_date` (optional): The ending date for filtering comments (format: `YYYY-MM-DD`).
+  - `tag` (optional): The comment Tag.
 
 **Example Request**:
 ```bash
@@ -66,15 +70,13 @@ GET http://127.0.0.1:8000/search/?name=John&start_date=2023-01-01&end_date=2023-
 **Response Example**:
 ```json
 {
-"_index": "comments",
-"_id": "EccXd5MBxe2acnTqvErZ",
-"_score": 1,
-"_source": {
+   "id": "EccXd5MBxe2acnTqvErZ",
    "Name": "John Doe",
    "Username": "johnny",
    "Category": "Reiciendis",
    "Text": "This is a great comment!",
-   "inserted_at": "2024-11-29T08:44:24.642866"
+   "inserted_at": "2024-11-29T08:44:24.642866",
+   "Tag": 1,
 }
 ```
 ### Tag a Comment
@@ -91,6 +93,7 @@ Content-Type: application/json
   "document_id": EccXd5MBxe2acnTqvErZ,
   "tag": "important"
 }
+```
 **Response Example**:
 ```json
 {
