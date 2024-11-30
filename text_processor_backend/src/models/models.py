@@ -23,3 +23,11 @@ class SearchParams(BaseModel):
     end_date: Optional[date] = Query(
         None, description="End date for 'inserted_at' filter (YYYY-MM-DD)"
     )
+
+
+class Comment(BaseModel):
+    id: str
+    Name: str
+    Username: str
+    Category: str
+    Text: str

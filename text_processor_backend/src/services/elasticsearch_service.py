@@ -4,16 +4,19 @@ from elasticsearch import Elasticsearch
 from fastapi import HTTPException
 
 from src.main import SearchParams
+from src.models.models import Comment, SearchParams
 
 
 class ElasticsearchService:
     def __init__(self, es_client: Elasticsearch):
         self.es = es_client
 
-    def search(self, params: Optional[SearchParams]):
+    def search(self, params: Optional[SearchParams]) -> list[Comment]:
         query_body = self.__create_es_query(params=params)
         response = self.es.search(index="comments", body=query_body)
-        return {"hits": response["hits"]["hits"]}
+        return [
+            Comment(id=hit["_id"], **hit["_source"]) for hit in response["hits"]["hits"]
+        ]
 
     def validate_tag(self, tag: int) -> bool:
         valid_tags = {1, 2, 3}
@@ -29,7 +32,7 @@ class ElasticsearchService:
             response = self.es.update(
                 index="comments",
                 id=document_id,
-                body={"doc": {"tag": tag}},  # Store the single tag
+                body={"doc": {"tag": tag}},
             )
             if response.get("result") != "updated":
                 raise HTTPException(status_code=404, detail="Document not found.")

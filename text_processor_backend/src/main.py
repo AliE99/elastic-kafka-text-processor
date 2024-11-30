@@ -1,19 +1,19 @@
-from typing import Optional
+from typing import List
 
 from elasticsearch import Elasticsearch
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 
-from src.models.models import SearchParams, TagRequest
+from src.models.models import Comment, SearchParams, TagRequest
 from src.services.elasticsearch_service import ElasticsearchService
 
 app = FastAPI()
 
-es = Elasticsearch("http://localhost:9200")
+es = Elasticsearch("http://localhost:9200")  # TODO: Add environment variable
 
 es_service = ElasticsearchService(es)
 
 
-@app.get("/search/")
+@app.get("/search/", response_model=List[Comment])
 async def search_comments(params: SearchParams = Depends()):
     return es_service.search(params)
 
