@@ -32,7 +32,7 @@ class ElasticsearchService:
             response = self.es.update(
                 index="comments",
                 id=document_id,
-                body={"doc": {"tag": tag}},
+                body={"doc": {"Tag": tag}},
             )
             if response.get("result") != "updated":
                 raise HTTPException(status_code=404, detail="Document not found.")

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 class TagRequest(BaseModel):
     document_id: str
-    tag: int
+    Tag: int
 
 
 class SearchParams(BaseModel):
@@ -31,3 +31,4 @@ class Comment(BaseModel):
     Username: str
     Category: str
     Text: str
+    Tag: Optional[int] = None
